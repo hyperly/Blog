@@ -232,6 +232,203 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hyperly.github.io/Blog/Blog/2019/05/10/DeepLearningWithUbuntu/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="hyperly">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/Blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hyperly's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/Blog/2019/05/10/DeepLearningWithUbuntu/" itemprop="url">Deep Learning With Ubuntu</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-05-10T16:19:10+08:00">
+                2019-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本文适用于配置 <a href="http://zh.d2l.ai/" target="_blank" rel="noopener">《动手学深度学习》</a>书中的 Linux + NVIDIA 显卡环境。因文中对于GPU的安装描述略显简单，故结合个人经验拾遗补缺。</p>
+<p>参考文献：</p>
+<blockquote>
+<p><em><a href="https://blog.csdn.net/xunan003/article/details/81665835" target="_blank" rel="noopener">https://blog.csdn.net/xunan003/article/details/81665835</a></em></p>
+<p><em><a href="https://blog.csdn.net/u010801439/article/details/80483036" target="_blank" rel="noopener">https://blog.csdn.net/u010801439/article/details/80483036</a></em></p>
+<p><a href="https://www.jianshu.com/p/52a49bcb2fac" target="_blank" rel="noopener"><em>https://www.jianshu.com/p/52a49bcb2fac</em></a></p>
+</blockquote>
+<h1 id="1-准备一台带有GPU的电脑（废话）"><a href="#1-准备一台带有GPU的电脑（废话）" class="headerlink" title="1. 准备一台带有GPU的电脑（废话）"></a>1. 准备一台带有GPU的电脑（废话）</h1><h1 id="2-安装显卡驱动和CUDA-cuDNN。"><a href="#2-安装显卡驱动和CUDA-cuDNN。" class="headerlink" title="2. 安装显卡驱动和CUDA, cuDNN。"></a>2. 安装显卡驱动和CUDA, cuDNN。</h1><p>Ubuntu18.04 默认安装，一路回车即可。后续步骤参照我的显卡（GTX 1060 3GB显存）安装驱动程序等。</p>
+<h2 id="2-1-驱动安装"><a href="#2-1-驱动安装" class="headerlink" title="2.1 驱动安装"></a>2.1 驱动安装</h2><p>首先，禁用第三方开源的驱动程序nouveau，避免安装时登录界面循环问题。</p>
+<p>禁用之前先查看nouveau驱动是否存在：</p>
+<p><code>lsmod | grep nouveau</code></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/17427791-eea2693561639cf5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img"></p>
+<p>若显示为空可直接跳过后续步骤直接下载新版驱动。否则，执行命令编辑 blacklist-nouveau.conf 文件。</p>
+<p><code>sudo vi /etc/modprobe.d/blacklist-nouveau.conf</code></p>
+<p>修改后的文件内容如下：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/17427791-da4b0985332f84a9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img"></p>
+<p>更新系统，然后重启（务必）</p>
+<p><code>sudo update-initramfs -u</code></p>
+<p>重启后，验证nouveau是否已禁用</p>
+<p><code>lsmod | grep nouveau</code></p>
+<p>然后，<a href="https://www.geforce.cn/drivers" target="_blank" rel="noopener">官网</a>下载相应驱动并安装：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/17427791-e42c503f9a56dd55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img"></p>
+<p>下载完毕后，将文件拷贝到任意目录下并赋予运行权限。</p>
+<p><code>sudo chmod  a+x NVIDIA-Linux-x86_64-xxx.run</code></p>
+<p>图形界面下按“ctrl+alt+f1”进入命令行界面，在命令行界面下输入以下命令，关闭图形界面：</p>
+<p><code>sudo service lightdm stop</code></p>
+<p>如安装过其他版本驱动，则卸载掉原有驱动：</p>
+<p><code>*sudo apt-get remove nvidia-**</code>  </p>
+<p><em>执行安装，附带以下参数：</em></p>
+<p><code>*sudo ./NVIDIA-Linux-x86_64-xxx.run -no-x-check -no-nouveau-check -no-opengl-files*</code></p>
+<p>-no-x-check：安装驱动时关闭X服务</p>
+<p>-no-nouveau-check：安装驱动时禁用nouveau</p>
+<p>-no-opengl-files：只安装驱动文件，不安装OpenGL文件</p>
+<p>安装过程中的选项，建议选择如下（选错了也没关系，多试几次就行了）：</p>
+<ol>
+<li><p>DKMS：No</p>
+</li>
+<li><p>32-bit 兼容：No</p>
+</li>
+<li><p>NVIDIA-xconfigutility ：Yes</p>
+</li>
+</ol>
+<p>安装结束后，挂载驱动：</p>
+<p><code>modprobe nvidia</code></p>
+<p>执行命令检查驱动是否安装成功：</p>
+<p><code>nvidia-smi</code></p>
+<p>如果出现如下提示，则说明安装成功：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/17427791-e42c503f9a56dd55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img"></p>
+<p>最后建议重启系统</p>
+<h2 id="2-2-安装CUDA和cuDNN"><a href="#2-2-安装CUDA和cuDNN" class="headerlink" title="2.2 安装CUDA和cuDNN"></a>2.2 安装CUDA和cuDNN</h2><p>进入<a href="https://developer.nvidia.com/cuda-10.0-download-archive?target_os=Linux&amp;target_arch=x86_64&amp;target_distro=Ubuntu&amp;target_version=1804&amp;target_type=runfilelocal" target="_blank" rel="noopener">官网</a>，选择CUDA版本并进行下载：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/17427791-e42c503f9a56dd55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img"></p>
+<p>拷贝文件到任意路径，执行命令安装：</p>
+<p><code>sudo sh ./cuda_10.xxx_linux.run</code></p>
+<p>需要注意的是，因之前已经安装过显卡驱动程序，故在提问是否安装显卡驱动时选择No，其他默认即可。</p>
+<p>安装完毕后，根据提示添加两条路径到 .bashrc 文件中（注意CUDA版本）：</p>
+<p><code>sudo vi ~/.bashrc</code></p>
+<p><code>export PATH=/usr/local/cuda/bin${PATH:+:$PATH}}</code></p>
+<p><code>export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}</code></p>
+<p>至此，CUDA安装完毕，可执行以下命令测试，若最后提示“pass”则安装成功，否则需要卸载后重新安装。</p>
+<p><code>nvcc --version</code></p>
+<p><code>cd /home/hyperly/NVIDIA_CUDA-10.0_Samples/1_Utilities/deviceQuery</code></p>
+<p><code>make</code></p>
+<p><code>./deviceQuery</code></p>
+<p>之后安装cuDNN，需要注册后才可下载。</p>
+<p>点击<a href="https://developer.nvidia.com/cudnn" target="_blank" rel="noopener">官网</a>，注册账号后下载：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/17427791-e42c503f9a56dd55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img"></p>
+<p>下载完毕后，进入文件夹，将 cudnn-10.1-linux-x64-v7.5.1.10.tgz 压缩包先解压，然后将其中的内容复制到 <em>/usr/local</em> 的CUDA安装文件夹里面。</p>
+<p><code>sudo cp cuda/include/cudnn.h    /usr/local/cuda/include</code></p>
+<p><code>sudo cp cuda/lib64/libcudnn\*    /usr/local/cuda/lib64</code></p>
+<p><code>sudo chmod a+r /usr/local/cuda/include/cudnn.h   /usr/local/cuda/lib64/libcudnn</code></p>
+<p>至此，cuDNN的安装完成。</p>
+<p>此外，若需要删除CUDA和cuDNN，可使用如下命令：</p>
+<p><code>sudo /usr/local/cuda/bin/uninstall_cuda_10.0.pl</code></p>
+<p><code>sudo rm -rf /usr/local/cuda</code></p>
+<h1 id="3-配置GPU版本的运行环境"><a href="#3-配置GPU版本的运行环境" class="headerlink" title="3. 配置GPU版本的运行环境"></a>3. 配置GPU版本的运行环境</h1><h2 id="3-1-参照书中完成前两步的配置，即安装Miniconda和下载解压最新代码。"><a href="#3-1-参照书中完成前两步的配置，即安装Miniconda和下载解压最新代码。" class="headerlink" title="3.1 参照书中完成前两步的配置，即安装Miniconda和下载解压最新代码。"></a>3.1 参照书中完成前两步的配置，即安装Miniconda和下载解压最新代码。</h2><h2 id="3-2-使用conda直接创建GPU版本的虚拟运行环境。"><a href="#3-2-使用conda直接创建GPU版本的虚拟运行环境。" class="headerlink" title="3.2 使用conda直接创建GPU版本的虚拟运行环境。"></a>3.2 使用conda直接创建GPU版本的虚拟运行环境。</h2><p>此处需根据显卡驱动版本，改变为依赖为GPU版本的MXNet。使用文本编辑器打开本书的代码所在根目录下的文件environment.yml，将里面的字符串“mxnet”替换成对应的GPU版本。例如，本机上装的是10.0版本的CUDA，则将该文件中的字符串“mxnet”改为“mxnet-cu100”。同时还需要更新MXNet的对应版本（若版本不对则会报错，直接从出错信息中选择一个最新的版本号然后修改environment.yml文件即可）。</p>
+<p>保存文件后退出，例如本机最后的配置信息如下：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/17427791-e42c503f9a56dd55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img"></p>
+<h2 id="3-3-激活环境并使用Jypyter。"><a href="#3-3-激活环境并使用Jypyter。" class="headerlink" title="3.3 激活环境并使用Jypyter。"></a>3.3 激活环境并使用Jypyter。</h2><p>P.S. 如果重新下载了代码，则需要按照书中所述，卸载MXNet， 更新environment.yml文件并重新激活环境。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://hyperly.github.io/Blog/Blog/2019/04/19/FreeSurfingByUsingAWS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -671,7 +868,7 @@
               
                 <a href="/Blog/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
